@@ -1,0 +1,218 @@
+<div class="py-6 px-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Users</h1>
+  </div>
+
+  <div class="mb-6" style="max-width: 1200px;">
+    <div class="relative">
+      <input
+        type="text"
+        id="user-search"
+        name="search"
+        value="<%= params[:search] %>"
+        placeholder="Search by name or email..."
+        class="w-full rounded-md bg-white border border-gray-300 px-4 py-2 pl-10 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+      />
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <% if @users.any? %>
+    <div class="hidden md:block bg-white shadow rounded-lg overflow-hidden" style="max-width: 1200px;">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+            <th scope="col" class="px-6 py-3 tracking-wider"></th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @users.each do |user| %>
+            <tr class="hover:bg-gray-50 group" id="user-row-<%= user.id %>" data-user-id="<%= user.id %>">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= user.id %></td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <% if user.avatar.attached? && user.avatar.blob.persisted? %>
+                    <%= image_tag user.avatar, class: "h-8 w-8 rounded-full object-cover mr-3" %>
+                  <% else %>
+                    <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                      <svg class="h-4 w-4 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    </div>
+                  <% end %>
+                  <div class="text-sm font-medium text-gray-900"><%= user.name %></div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= user.email %></td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% if user.role == 'admin' %>
+                  <span data-role="admin" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">Admin</span>
+                <% else %>
+                  <span data-role="regular" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Regular</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% if user.disabled %>
+                  <span data-status="disabled" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Disabled</span>
+                <% else %>
+                  <span data-status="active" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= user.created_at.strftime("%b %d, %Y") %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <% unless user.id == User::ROOT_USER_ID %>
+                  <button type="button" class="user-menu-button opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-gray-600" data-user-id="<%= user.id %>">
+                    <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                    </svg>
+                  </button>
+                  <div class="user-menu hidden w-48 rounded-lg bg-white shadow-lg ring-1 ring-gray-200" data-user-id="<%= user.id %>" style="position: fixed; z-index: 9999;">
+                    <div class="py-1">
+                      <%= link_to "Edit", edit_admin_user_path(user), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" %>
+                      <% if user.role == 'admin' %>
+                        <%= link_to "Make regular user", toggle_role_admin_user_path(user), data: { "turbo-method": :patch }, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" %>
+                      <% else %>
+                        <%= link_to "Make admin", toggle_role_admin_user_path(user), data: { "turbo-method": :patch }, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" %>
+                      <% end %>
+                      <% if policy(user).destroy? %>
+                        <%= link_to "Delete", admin_user_path(user), data: { "turbo-method": :delete, "turbo-confirm": "Are you sure you want to delete #{user.name}?" }, class: "block px-4 py-2 text-sm text-red-600 hover:bg-red-50" %>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="md:hidden space-y-4">
+      <% @users.each do |user| %>
+        <div class="bg-white shadow rounded-lg p-4 group">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center">
+              <% if user.avatar.attached? && user.avatar.blob.persisted? %>
+                <%= image_tag user.avatar, class: "h-10 w-10 rounded-full object-cover mr-3" %>
+              <% else %>
+                <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                  <svg class="h-5 w-5 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+              <% end %>
+              <h3 class="text-lg font-medium text-gray-900"><%= user.name %></h3>
+            </div>
+            <% if user.role == 'admin' %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">Admin</span>
+            <% else %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Regular</span>
+            <% end %>
+          </div>
+          <p class="text-sm text-gray-500"><%= user.email %></p>
+          <p class="text-xs text-gray-400 mt-1">ID: <%= user.id %> &bull; Joined <%= user.created_at.strftime("%b %d, %Y") %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mt-6">
+      <%= paginate @users %>
+    </div>
+  <% else %>
+    <div class="bg-white shadow rounded-lg p-6">
+      <div class="text-center">
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No users</h3>
+        <p class="mt-1 text-sm text-gray-500">No registered users yet.</p>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<script>
+(function() {
+  function positionMenu(button, menu) {
+    const buttonRect = button.getBoundingClientRect();
+    menu.style.top = (buttonRect.bottom + 8) + 'px';
+    menu.style.left = (buttonRect.right - 192) + 'px';
+  }
+
+  function initUserMenus() {
+    document.querySelectorAll('.user-menu-button').forEach(button => {
+      button.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const thisMenu = this.nextElementSibling;
+        document.querySelectorAll('.user-menu').forEach(menu => {
+          if (menu !== thisMenu) menu.classList.add('hidden');
+        });
+        if (thisMenu.classList.contains('hidden')) {
+          positionMenu(this, thisMenu);
+          thisMenu.classList.remove('hidden');
+        } else {
+          thisMenu.classList.add('hidden');
+        }
+      };
+    });
+    document.onclick = function(e) {
+      if (!e.target.closest('.user-menu') && !e.target.closest('.user-menu-button')) {
+        document.querySelectorAll('.user-menu').forEach(menu => menu.classList.add('hidden'));
+      }
+    };
+    window.addEventListener('scroll', function() {
+      document.querySelectorAll('.user-menu').forEach(menu => {
+        if (!menu.classList.contains('hidden')) menu.classList.add('hidden');
+      });
+    }, true);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUserMenus);
+  } else {
+    initUserMenus();
+  }
+  document.addEventListener('turbo:load', initUserMenus);
+})();
+
+(function() {
+  function initSearch() {
+    const searchInput = document.getElementById('user-search');
+    if (!searchInput) return;
+    let searchTimer = null;
+    searchInput.addEventListener('input', function(e) {
+      if (searchTimer) clearTimeout(searchTimer);
+      searchTimer = setTimeout(function() {
+        const searchValue = e.target.value;
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = window.location.pathname;
+        if (searchValue.trim()) {
+          const searchField = document.createElement('input');
+          searchField.type = 'hidden';
+          searchField.name = 'search';
+          searchField.value = searchValue;
+          form.appendChild(searchField);
+        }
+        document.body.appendChild(form);
+        Turbo.navigator.submitForm(form);
+        document.body.removeChild(form);
+      }, 1000);
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSearch);
+  } else {
+    initSearch();
+  }
+  document.addEventListener('turbo:load', initSearch);
+})();
+</script>

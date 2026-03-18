@@ -1,0 +1,140 @@
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <%= render 'shared/navigation' %>
+
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <div class="px-6 py-6 space-y-6">
+        <div class="grid grid-cols-3 gap-6">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Sharing Type</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @order.sharing_type&.humanize || "Not set" %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">State</dt>
+            <dd class="mt-1">
+              <% badge_color = case @order.state
+                 when "submitted" then "bg-yellow-100 text-yellow-800"
+                 when "preparing" then "bg-orange-100 text-orange-800"
+                 when "delivery_waiting" then "bg-purple-100 text-purple-800"
+                 when "in_delivery" then "bg-orange-100 text-orange-800"
+                 when "finished" then "bg-green-100 text-green-800"
+                 else "bg-gray-100 text-gray-800"
+                 end %>
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <%= badge_color %>">
+                <%= @order.state.humanize %>
+              </span>
+              <% if @order.archived? %>
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                  Archived
+                </span>
+              <% end %>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Created</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @order.created_at.strftime("%b %d, %Y %H:%M") %></dd>
+          </div>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Splitting</dt>
+          <dd class="mt-1 flex items-center gap-3">
+            <% if @order.splits_configured? %>
+              <% if @order.all_participants_approved? %>
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Approved</span>
+              <% else %>
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending approval</span>
+              <% end %>
+            <% else %>
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Not configured</span>
+            <% end %>
+            <%= link_to(@order.splits_configured? ? "View Splitting" : "Configure Splitting",
+                  order_splitting_path(@order),
+                  class: "text-sm text-indigo-600 hover:text-indigo-900") %>
+          </dd>
+        </div>
+
+        <% if @order.order_items.any? %>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900 mb-3">Items</h2>
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Article</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% @order.order_items.includes(:article).each do |item| %>
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= item.article.title %></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= item.quantity %></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= number_to_currency(item.price, unit: "RSD ", precision: 2) %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Payments %>
+    <div class="bg-white shadow rounded-lg overflow-hidden mt-6">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Payments</h2>
+        <% if @order.fully_paid? %>
+          <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Fully Paid</span>
+        <% else %>
+          <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+            <%= number_to_currency(@order.total_paid, unit: "RSD ", precision: 2) %> / <%= number_to_currency(@order.total, unit: "RSD ", precision: 2) %>
+          </span>
+        <% end %>
+      </div>
+
+      <div class="px-6 py-4 space-y-4">
+        <% @order.order_payment_transactions.includes(:user).each do |payment| %>
+          <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+            <div>
+              <span class="text-sm font-medium text-gray-900"><%= payment.user.name %></span>
+              <span class="text-sm text-gray-900 ml-2"><%= number_to_currency(payment.amount, unit: "RSD ", precision: 2) %></span>
+              <% if payment.comment.present? %>
+                <span class="text-sm text-gray-500 ml-2">— <%= payment.comment %></span>
+              <% end %>
+              <span class="text-xs text-gray-400 ml-2"><%= payment.created_at.strftime("%b %d, %H:%M") %></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <% if payment.confirmed? %>
+                <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">Confirmed</span>
+              <% else %>
+                <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                <% if payment.user_id == current_user.id && !@order.archived? %>
+                  <%= link_to order_payment_transaction_path(@order, payment),
+                    data: { "turbo-method": :delete, "turbo-confirm": "Revoke this payment?" },
+                    class: "text-xs text-red-600 hover:text-red-800" do %>
+                    Revoke
+                  <% end %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="pt-2 flex items-center gap-3">
+          <% unless @order.archived? %>
+            <%= link_to "Record Payment", new_order_payment_transaction_path(@order),
+              class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          <% end %>
+          <% if @order.finished? && !@order.archived? && @order.owner_id == current_user.id %>
+            <%= link_to archive_order_path(@order),
+              data: { "turbo-method": :post, "turbo-confirm": "Archive this order? This will snapshot balances." },
+              class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" do %>
+              Archive Order
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

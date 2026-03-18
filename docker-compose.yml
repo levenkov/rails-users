@@ -1,0 +1,16 @@
+---
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: puhatak
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: puhatak_dev
+    ports:
+      - "5432:5432"
+  redis:
+    image: redis:8.0-alpine
+    restart: always
+    ports:
+      - "6379:6379"

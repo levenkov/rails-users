@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Puhatak - Admin</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <%= favicon_link_tag "favicon.png" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "custom", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            },
+          }
+        }
+      }
+    </script>
+  </head>
+
+  <body class="bg-gray-50" style="font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;">
+    <div class="min-h-screen flex">
+      <%= render 'admin/shared/navigation' %>
+
+      <div class="flex-1">
+        <% if flash[:notice] %>
+          <div class="mx-8 mt-6 p-4 text-sm text-green-700 bg-green-100 rounded-lg border border-green-200" role="alert">
+            <%= flash[:notice] %>
+          </div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="mx-8 mt-6 p-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200" role="alert">
+            <%= flash[:alert] %>
+          </div>
+        <% end %>
+        <%= yield %>
+      </div>
+    </div>
+  </body>
+</html>

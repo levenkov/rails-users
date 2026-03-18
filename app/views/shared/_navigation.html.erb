@@ -1,0 +1,20 @@
+<div class="flex justify-between items-center mb-8">
+  <h1 class="text-3xl font-extrabold text-gray-900">
+    <%= link_to "Puhatak", root_path, class: "hover:text-gray-700" %>
+  </h1>
+  <div class="flex items-center gap-3">
+    <% if current_user&.admin? %>
+      <%= link_to "Admin", admin_users_path,
+          class: "py-2 px-4 rounded-md text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50" %>
+    <% end %>
+    <% has_cart_items = user_carts.joins(:cart_items).exists? %>
+    <%= link_to has_cart_items ? "Cart (*)" : "Cart", carts_path,
+        class: "py-2 px-4 rounded-md text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50" %>
+    <%= link_to "Orders", orders_path,
+        class: "py-2 px-4 rounded-md text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50" %>
+    <%= link_to "Profile", users_me_path,
+        class: "py-2 px-4 rounded-md text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50" %>
+    <%= link_to "Sign Out", destroy_user_session_path, data: { turbo_method: :delete },
+        class: "py-2 px-4 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700" %>
+  </div>
+</div>

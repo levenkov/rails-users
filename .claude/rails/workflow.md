@@ -1,0 +1,1 @@
+Run `bin/rubocop --autocorrect` after each big task.

@@ -1,0 +1,21 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "puhatak-backend.fullname" . }}-minio
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}-minio
+    helm.sh/chart: {{ include "puhatak-backend.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: {{ if .Values.gateway.host }}Host(`{{ .Values.gateway.host }}`) && {{ end }}PathPrefix(`/minio`)
+      kind: Rule
+      middlewares:
+        - name: {{ include "puhatak-backend.fullname" . }}-minio-stripprefix
+      services:
+        - name: {{ include "puhatak-backend.fullname" . }}-minio
+          port: 9000

@@ -1,0 +1,64 @@
+name: Build and Push Helm Chart
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./deploy/backend-chart
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Retrieve the version
+        id: gitver
+        working-directory: .
+        run: |
+          APP_VERSION=$(git describe --tags --abbrev=4 --match='*.*.*' || echo '0.0.0')
+          echo "app_version=${APP_VERSION}" >> $GITHUB_OUTPUT
+          echo "Application version: ${APP_VERSION}"
+
+          CHART_VERSION=$(yq eval '.version' deploy/backend-chart/Chart.yaml)
+          echo "chart_version=${CHART_VERSION}" >> $GITHUB_OUTPUT
+          echo "Chart version: ${CHART_VERSION}"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: '3.18.0'
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io --username $GITHUB_ACTOR --password-stdin
+
+      - name: Update app version
+        run: |
+          sed -i "s/appVersion: \"0\.0\.0\"/appVersion: \"${{ steps.gitver.outputs.app_version }}\"/g" Chart.yaml
+
+      - name: Lint Helm chart
+        run: |
+          helm lint .
+
+      - name: Package Helm chart
+        run: |
+          helm package .
+
+      - name: Push Helm chart to GHCR
+        run: |
+          helm push puhatak-backend-${{ steps.gitver.outputs.chart_version }}.tgz oci://ghcr.io/${{ github.repository }}/charts

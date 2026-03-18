@@ -1,0 +1,9 @@
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
+  <h3 style="color: #111827;">Current Settings:</h3>
+  <ul style="color: #6B7280;">
+    <li><strong style="color: #111827;">Client ID:</strong> <%= @client_id.present? ? "Set" : "Not set" %></li>
+    <li><strong style="color: #111827;">Client Secret:</strong> <%= @client_secret.present? ? "Set" : "Not set" %></li>
+    <li><strong style="color: #111827;">Refresh Token:</strong> <%= @refresh_token.present? ? "Set" : "Not set" %></li>
+    <li><strong style="color: #111827;">From Email:</strong> <%= @from_email.present? ? @from_email : "Not set" %></li>
+  </ul>
+</div>

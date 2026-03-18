@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configObjectName | default (printf "%s-db-config" (include "puhatak-backend.fullname" .)) }}
+  namespace: {{ .Release.Namespace }}
+data:
+  database.yml: |
+    production:
+      adapter: postgresql
+      encoding: unicode
+      pool: 5
+      host: {{ include "puhatak-backend.fullname" . }}-postgres
+      database: {{ .Values.db.database }}
+      username: {{ .Values.db.username }}
+      password: {{ .Values.db.password }}

@@ -1,0 +1,27 @@
+---
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: puhatak
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: puhatak_test
+    ports:
+      - "5432:5432"
+  redis:
+    image: redis:8.0-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+  test:
+    build:
+      context: ../..
+      dockerfile: test/docker/Dockerfile
+    depends_on:
+      - db
+      - redis
+    environment:
+      RAILS_ENV: test
+      DATABASE_URL: postgresql://puhatak:password@db:5432/puhatak_test
+      REDIS_URL: redis://redis:6379/1

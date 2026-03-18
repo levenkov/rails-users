@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "puhatak-backend.fullname" . }}-minio-init
+  labels:
+    app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}-minio-init
+    helm.sh/chart: {{ include "puhatak-backend.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 30
+  activeDeadlineSeconds: 300 #< Total timeout: 5 minutes.
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}-minio-init
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: minio-init
+          image: minio/mc:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              
+              # Configure MinIO client (will fail if MinIO is not ready)
+              mc alias set local http://{{ include "puhatak-backend.fullname" . }}-minio:9000 {{ .Values.minio.credentials.accessKey }} {{ .Values.minio.credentials.secretKey }}
+              
+              # Create bucket if it doesn't exist
+              mc mb local/{{ .Values.minio.bucket }} --ignore-existing
+              
+              # Set anonymous access policy for the bucket
+              mc anonymous set public local/{{ .Values.minio.bucket }}
+              
+              echo "MinIO initialization completed successfully"

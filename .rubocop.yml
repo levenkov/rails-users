@@ -1,0 +1,51 @@
+inherit_gem: { rubocop-rails-omakase: rubocop.yml }
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Style/SymbolArray:
+  Enabled: true
+  EnforcedStyle: percent
+  MinSize: 2
+
+Style/WordArray:
+  Enabled: true
+  EnforcedStyle: percent
+  MinSize: 2
+
+Style/BlockDelimiters:
+  Enabled: true
+  EnforcedStyle: line_count_based
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
+
+Layout/LineLength:
+  Enabled: true
+  Max: 120
+
+Layout/ArgumentAlignment:
+  Enabled: true
+  EnforcedStyle: with_fixed_indentation
+
+Layout/ArrayAlignment:
+  Enabled: true
+  EnforcedStyle: with_fixed_indentation
+
+Layout/ParameterAlignment:
+  Enabled: true
+  EnforcedStyle: with_fixed_indentation
+
+Layout/IndentationWidth:
+  Enabled: true
+  Width: 2
+
+Layout/IndentationConsistency:
+  Enabled: true
+  EnforcedStyle: normal
+
+Layout/MultilineBlockLayout:
+  Enabled: true

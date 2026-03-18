@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "puhatak-backend.fullname" . }}-minio-data
+  labels:
+    app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}-minio
+    helm.sh/chart: {{ include "puhatak-backend.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.minio.storage.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.minio.storage.size }}

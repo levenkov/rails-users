@@ -1,0 +1,49 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/puhatak-foods/backend
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+env:
+  - name: RAILS_ENV
+    value: "production"
+  - name: RAILS_LOG_TO_STDOUT
+    value: "true"
+  - name: PORT
+    value: "3000"
+
+credentials:
+  productionYmlEnc: "4/Og31mGUYvrHJRrJ+deqXv6kp6sx9k4dSkNXZ7Cm+X6QXcLllwr6V36U3+MUHFXmSc7uEJnEAF2QtGhWVtF/EpMDkYbIUSVFUfOm38GYUr7Tw2MPiFIhW5oa1ADeznd+s4Ex2DrimDxkbIkpQ91lgfjnFhIs4VbarGIdG3L7lplU3xVFUulcpkpCc9U/VIoTAvvaHBUCI1h4e0Swki7Myk9OAz3rslwMrLg+Fxah9JXpAU9pfrOwXjuew+dFXq3XBLmVtG5Xo9KTCpgZf5QrxsBpugPreww+vjYEsTM0peNYbZ/wAd9SPpX7BCOCi+eok9IA61kRMxVEb6wZBJMrnF7oKDGPOCQmjLUAoMHuK4xGO7NdA6jfHQKsEtZ7wwPadnMs/fMP1zfIj2fAvnzAEl58ZjHAL2aUOA96PpEJiOO5cZaFDLvrHVCV3Z02ge3vvS5d4DLR8j2uozo/B5QDxyHwl4+h1Vi1eRw1d+UtJZq9VXs/+Qjrfv1--6IbkAiz7fQGg67lk--9aM18ya9NkUwMfEVvZQS4Q=="
+  productionKey: "767974505dff5999457ed223bf40d4c1"
+
+db:
+  database: "puhatak_production"
+  username: "puhatak"
+  password: "password"
+  storage:
+    size: "5Gi"
+    storageClass: "hostpath"
+
+gateway:
+  className: "traefik"
+  host: ""
+  filters:
+    requestBodySize: "10M"
+
+minio:
+  storage:
+    size: "10Gi"
+    storageClass: "hostpath"
+  credentials:
+    accessKey: "minio"
+    secretKey: "minio123"
+  bucket: "puhatak-storage"
+  publicUrl: "http://localhost/minio"

@@ -1,0 +1,79 @@
+<div class="py-6 px-8">
+  <div class="mb-8 flex items-center justify-between" style="max-width: 1200px;">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Articles &mdash; <%= @market.name %></h1>
+      <p class="mt-2 text-sm text-gray-500">
+        <%= link_to "← Back to market", edit_admin_market_path(@market), class: "text-indigo-600 hover:text-indigo-900" %>
+      </p>
+    </div>
+    <%= link_to "New Article", new_admin_market_article_path(@market), class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+  </div>
+
+  <% if @articles.any? %>
+    <div class="bg-white shadow rounded-lg overflow-hidden" style="max-width: 1200px;">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price (RSD)</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+            <th scope="col" class="px-6 py-3 tracking-wider"></th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @articles.each do |article| %>
+            <tr class="hover:bg-gray-50 group">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= article.id %></td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <% if article.photos.attached? && article.photos.first&.blob&.persisted? %>
+                    <%= image_tag article.photos.first, class: "h-8 w-8 rounded object-cover mr-3" %>
+                  <% else %>
+                    <div class="h-8 w-8 rounded bg-indigo-100 flex items-center justify-center mr-3">
+                      <svg class="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                    </div>
+                  <% end %>
+                  <div class="text-sm font-medium text-gray-900"><%= article.title %></div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <% min, max = article.price_range %>
+                <% if min && max %>
+                  <%= min == max ? min : "#{min} – #{max}" %>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <% if article.unlimited %>
+                  <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <% else %>
+                  <%= article.stock %>
+                <% end %>
+              </td>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= article.created_at.strftime("%b %d, %Y") %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                <%= link_to "Edit", edit_admin_market_article_path(@market, article), class: "text-indigo-600 hover:text-indigo-900" %>
+                <%= link_to "Delete", admin_market_article_path(@market, article), data: { "turbo-method": :delete, "turbo-confirm": "Are you sure you want to delete #{article.title}?" }, class: "text-red-600 hover:text-red-900" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-6">
+      <%= paginate @articles %>
+    </div>
+  <% else %>
+    <div class="bg-white shadow rounded-lg p-6" style="max-width: 1200px;">
+      <div class="text-center">
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No articles</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by creating a new article for this market.</p>
+      </div>
+    </div>
+  <% end %>
+</div>

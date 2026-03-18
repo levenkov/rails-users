@@ -1,0 +1,135 @@
+<div class="py-6 px-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Edit User</h1>
+    <p class="mt-2 text-sm text-gray-500">Update user information</p>
+  </div>
+
+  <div class="bg-white shadow rounded-lg mb-6" style="max-width: 1200px;">
+    <div class="px-6 py-6">
+      <h2 class="text-lg font-medium text-gray-900 mb-4">User Information</h2>
+      <%= form_with(model: [:admin, @user], local: true, class: "space-y-6") do |form| %>
+        <% if @user.errors.any? %>
+          <div class="rounded-lg bg-red-50 p-4 border border-red-200">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">
+                  <%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:
+                </h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <ul class="list-disc pl-5 space-y-1">
+                    <% @user.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div>
+          <%= form.label :name, "Name:", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.text_field :name, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :email, "Email:", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.email_field :email, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
+          </div>
+        </div>
+
+        <div class="flex items-center">
+          <%= form.check_box :disabled, class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
+          <%= form.label :disabled, "Disable this account", class: "ml-2 block text-sm text-gray-900" %>
+          <p class="ml-2 text-xs text-gray-500">(User will not be able to log in or perform any actions)</p>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+          <%= link_to "Cancel", admin_users_path, class: "inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          <%= form.submit "Update User", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white shadow rounded-lg mb-6" style="max-width: 1200px;">
+    <div class="px-6 py-6">
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Profile Picture</h2>
+      <div class="flex items-start space-x-6">
+        <div class="flex-shrink-0">
+          <% if @user.avatar.attached? && @user.avatar.blob.persisted? %>
+            <%= image_tag @user.avatar, class: "h-24 w-24 rounded-full object-cover border-2 border-gray-200" %>
+          <% else %>
+            <div class="h-24 w-24 rounded-full bg-indigo-100 flex items-center justify-center">
+              <svg class="h-12 w-12 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex-1">
+          <%= form_with(model: [:admin, @user], local: true, html: { multipart: true }) do |form| %>
+            <div class="space-y-4">
+              <div>
+                <%= form.file_field :avatar,
+                  accept: "image/png,image/jpeg,image/webp",
+                  class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" %>
+                <p class="mt-1 text-xs text-gray-500">PNG, JPG or WebP. Max 2MB, max 512x512 pixels.</p>
+              </div>
+              <% if @user.errors[:avatar].any? %>
+                <div class="text-sm text-red-600">
+                  <% @user.errors[:avatar].each do |error| %>
+                    <p><%= error %></p>
+                  <% end %>
+                </div>
+              <% end %>
+              <div class="flex space-x-3">
+                <%= form.submit "Upload Avatar", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
+                <% if @user.avatar.attached? && @user.avatar.blob.persisted? %>
+                  <%= link_to "Remove Avatar",
+                    delete_avatar_admin_user_path(@user),
+                    data: { "turbo-method": :delete, "turbo-confirm": "Are you sure you want to remove this avatar?" },
+                    class: "inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white shadow rounded-lg" style="max-width: 1200px;">
+    <div class="px-6 py-6">
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Change Password</h2>
+      <%= form_with(model: [:admin, @user], local: true, class: "space-y-6") do |form| %>
+        <div>
+          <%= form.label :password, "New Password:", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.password_field :password, autocomplete: "new-password", class: "w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :password_confirmation, "Confirm New Password:", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.password_field :password_confirmation, autocomplete: "new-password", class: "w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <%= form.submit "Change Password", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

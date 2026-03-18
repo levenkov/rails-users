@@ -1,0 +1,46 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Retrieve the version
+        id: gitver
+        run: |
+          APP_VERSION=$(git describe --tags --abbrev=4 --match='*.*.*' || echo '0.0.0')
+          echo "app_version=${APP_VERSION}" >> $GITHUB_OUTPUT
+          echo "Application version: ${APP_VERSION}"
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+
+      - name: Build Docker image
+        run: |
+          sed -i "s/config\.version *= *['\"]0\.0\.0['\"]/config.version = '${{ steps.gitver.outputs.app_version }}'/" config/application.rb
+          docker build -t ghcr.io/${{ github.repository }}:latest .
+
+      - name: Push Docker image to GHCR
+        run: |
+          docker push ghcr.io/${{ github.repository }}:latest
+          docker tag ghcr.io/${{ github.repository }}:latest ghcr.io/${{ github.repository }}:${{ steps.gitver.outputs.app_version }}
+          docker push ghcr.io/${{ github.repository }}:${{ steps.gitver.outputs.app_version }}

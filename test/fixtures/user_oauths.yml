@@ -1,0 +1,6 @@
+google_user:
+  user: regular
+  provider: google_oauth2_ios
+  uid: "existing_user_uid"
+  email: vasilie.pupkine@gmail.com
+  name: Vasilie Pupkine

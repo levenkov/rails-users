@@ -1,0 +1,31 @@
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-3xl mx-auto">
+    <%= render 'shared/navigation' %>
+
+    <% if @open_carts.any? %>
+      <div class="space-y-4">
+        <% @open_carts.each do |cart| %>
+          <%= render partial: 'cart_card', locals: { cart: cart } %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-20">
+        <p class="text-lg text-gray-500 mb-4">You have no active carts</p>
+        <%= link_to "Browse Markets", root_path, class: "text-indigo-600 hover:text-indigo-900 font-medium" %>
+      </div>
+    <% end %>
+
+    <% if @closed_carts.any? %>
+      <details class="mt-10">
+        <summary class="text-xl font-bold text-gray-900 mb-4 cursor-pointer select-none hover:text-gray-700">
+          Archived Carts
+        </summary>
+        <div class="space-y-4">
+          <% @closed_carts.each do |cart| %>
+            <%= render partial: 'cart_card', locals: { cart: cart } %>
+          <% end %>
+        </div>
+      </details>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+<div class="bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <%= render 'shared/navigation' %>
+  </div>
+</div>
+
+<%= content_tag :div, nil,
+  id: "checkout-root",
+  data: {
+    cart_items: @cart_items.map { |i| { title: [i[:article].title, i[:variant].name].compact_blank.join(" — "), price: number_to_currency(i[:variant].price, unit: ""), quantity: i[:quantity], line_total: number_to_currency(i[:line_total], unit: "") } }.to_json,
+    total: number_to_currency(@total, unit: ""),
+    current_user_id: current_user.id,
+    current_user_name: current_user.name,
+    cart_path: cart_path(@cart),
+    orders_path: orders_path,
+    participants: @cart_participants.map { |u| { id: u.id, name: u.name } }.to_json,
+    csrf_token: form_authenticity_token,
+  } %>

@@ -1,0 +1,11 @@
+laptop_default:
+  article: laptop
+  price: 999.99
+
+phone_default:
+  article: phone
+  price: 599.99
+
+bread_default:
+  article: bread
+  price: 5.50

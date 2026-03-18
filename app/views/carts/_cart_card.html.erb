@@ -1,0 +1,29 @@
+<%= link_to cart_path(cart), class: "block bg-white shadow rounded-lg p-5 hover:shadow-md transition-shadow #{'opacity-60' if cart.closed?}" do %>
+  <div class="flex justify-between items-start">
+    <div>
+      <h2 class="text-lg font-semibold text-gray-900">
+        <%= cart.owner_id == current_user.id ? "My Cart" : "#{cart.owner.name}'s Cart" %>
+        <% if cart.closed? %>
+          <span class="inline-flex ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Closed</span>
+        <% end %>
+      </h2>
+      <p class="text-sm text-gray-500 mt-1"><%= cart.market.name %></p>
+    </div>
+    <div class="text-right">
+      <% total = cart.cart_items.sum { |ci| ci.article_variant.price * ci.quantity } %>
+      <p class="text-lg font-semibold text-gray-900"><%= number_to_currency(total, unit: "") %> RSD</p>
+      <p class="text-sm text-gray-500"><%= cart.items_count %> <%= "item".pluralize(cart.items_count) %></p>
+    </div>
+  </div>
+  <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+    <span><%= cart.cart_participants.size %> <%= "participant".pluralize(cart.cart_participants.size) %></span>
+    <% unless cart.closed? %>
+      <% ready_count = cart.cart_participants.count(&:ready?) %>
+      <% if ready_count > 0 %>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+          <%= ready_count %>/<%= cart.cart_participants.size %> ready
+        </span>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

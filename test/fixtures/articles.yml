@@ -1,0 +1,20 @@
+laptop:
+  title: Gaming Laptop
+  description: High performance laptop
+  unlimited: true
+  stock: 10
+  market: one
+
+phone:
+  title: Smartphone
+  description: Latest model smartphone
+  unlimited: true
+  stock: 25
+  market: one
+
+bread:
+  title: Sourdough Bread
+  description: Fresh baked daily
+  unlimited: true
+  stock: 50
+  market: two

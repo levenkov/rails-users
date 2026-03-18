@@ -1,0 +1,5 @@
+payment_one:
+  sender: regular
+  receiver: admin
+  amount: 999.99
+  description: Payment for laptop

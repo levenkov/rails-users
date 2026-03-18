@@ -1,0 +1,27 @@
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
+  <h3 style="color: #111827;">Send test email</h3>
+  <p style="color: #6B7280;">Email will be sent from: <strong style="color: #111827;"><%= @from_email %></strong></p>
+
+  <%= form_with url: send_test_admin_mail_setup_index_path, local: true do |f| %>
+    <div style="margin-bottom: 15px;">
+      <%= f.label :to, "To:", style: "display: block; margin-bottom: 5px; font-weight: 600; color: #374151;" %>
+      <%= f.email_field :to, required: true, placeholder: "recipient@example.com",
+          style: "width: 100%; padding: 8px 12px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 6px; color: #111827; outline: none;" %>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <%= f.label :subject, "Title:", style: "display: block; margin-bottom: 5px; font-weight: 600; color: #374151;" %>
+      <%= f.text_field :subject, required: true, placeholder: "Test email",
+          style: "width: 100%; padding: 8px 12px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 6px; color: #111827; outline: none;" %>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <%= f.label :body, "Email body:", style: "display: block; margin-bottom: 5px; font-weight: 600; color: #374151;" %>
+      <%= f.text_area :body, required: true, rows: 5, placeholder: "Your email text...",
+          style: "width: 100%; padding: 8px 12px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 6px; color: #111827; outline: none;" %>
+    </div>
+
+    <%= f.submit "Send test email",
+        style: "padding: 10px 20px; background: #4F46E5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;" %>
+  <% end %>
+</div>
