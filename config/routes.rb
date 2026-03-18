@@ -24,15 +24,6 @@ Rails.application.routes.draw do
     resources :users, only: [] do
       get :search, on: :collection
     end
-    resources :markets do
-      resources :articles
-    end
-    resources :orders, only: %i[index show create update] do
-      resource :splitting, only: %i[show update] do
-        resource :approval, only: %i[create destroy], module: :splitting
-        resources :participants, only: %i[create destroy], module: :splitting
-      end
-    end
   end
 
   namespace :admin do
@@ -40,14 +31,6 @@ Rails.application.routes.draw do
       member do
         patch :toggle_role
         delete :delete_avatar
-      end
-    end
-    resources :markets do
-      resources :articles, except: :show
-    end
-    resources :orders, only: %i[index show] do
-      member do
-        patch :transition
       end
     end
     get '', to: redirect('/admin/users')
@@ -60,43 +43,7 @@ Rails.application.routes.draw do
     end
   end
 
-  namespace :office do
-    resources :orders, only: %i[index show] do
-      member do
-        patch :transition
-        patch :confirm_payment
-      end
-    end
-    get '', to: redirect('/office/orders')
-  end
-
   get 'up' => 'rails/health#show', as: :rails_health_check
 
-  resources :carts, only: %i[index show update destroy] do
-    collection do
-      post :add
-      post :remove
-    end
-    member do
-      post :add_participant
-      delete :remove_participant
-      post :toggle_ready
-      post :copy
-    end
-  end
-
-  resources :orders, only: %i[index show new create] do
-    get :checkout, on: :collection
-    member do
-      post :archive
-    end
-    resource :splitting, only: :show
-    resources :payment_transactions, only: %i[new create destroy]
-  end
-
-  resources :financial_transactions, only: %i[index new create edit update destroy]
-
-  resources :markets, only: :show
-
-  root 'markets#index'
+  root 'health#show'
 end

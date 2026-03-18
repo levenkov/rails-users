@@ -58,39 +58,3 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-function initSplitEditor() {
-  const el = document.getElementById('split-editor-root');
-  if (el && !el._mounted) {
-    el._mounted = true;
-    import('./split_editor.jsx').then(({ mountSplitEditor }) => {
-      mountSplitEditor(el);
-    });
-  }
-}
-
-function initCheckout() {
-  const el = document.getElementById('checkout-root');
-  if (el && !el._mounted) {
-    el._mounted = true;
-    import('./checkout.jsx').then(({ mountCheckout }) => {
-      mountCheckout(el);
-    });
-  }
-}
-
-document.addEventListener('turbo:load', initSplitEditor);
-document.addEventListener('DOMContentLoaded', initSplitEditor);
-function initCartParticipants() {
-  const el = document.getElementById('cart-participants-root');
-  if (el && !el._mounted) {
-    el._mounted = true;
-    import('./cart_participants.jsx').then(({ mountCartParticipants }) => {
-      mountCartParticipants(el);
-    });
-  }
-}
-
-document.addEventListener('turbo:load', initCheckout);
-document.addEventListener('DOMContentLoaded', initCheckout);
-document.addEventListener('turbo:load', initCartParticipants);
-document.addEventListener('DOMContentLoaded', initCartParticipants);

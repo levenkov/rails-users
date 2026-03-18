@@ -14,18 +14,6 @@ class User < ApplicationRecord
   simple_enum :role, :admin, default: :regular
 
   has_many :user_oauths, dependent: :destroy
-  has_many :markets, foreign_key: :owner_id, dependent: :destroy, inverse_of: :owner
-  has_many :my_carts, class_name: 'Cart', foreign_key: :owner_id, dependent: :destroy, inverse_of: :owner
-  has_and_belongs_to_many :orders
-  has_many :owned_orders, class_name: 'Order', foreign_key: :owner_id, dependent: :nullify, inverse_of: :owner
-  has_many :split_approvals, dependent: :destroy
-  has_many :order_payment_transactions, dependent: :destroy
-  has_many :sent_financial_transactions,
-    class_name: 'FinancialTransaction', foreign_key: :sender_id,
-    dependent: :destroy, inverse_of: :sender
-  has_many :received_financial_transactions,
-    class_name: 'FinancialTransaction', foreign_key: :receiver_id,
-    dependent: :destroy, inverse_of: :receiver
   has_one_attached :avatar
 
   validates :name, presence: true

@@ -1,9 +1,0 @@
-laptop_regular_split:
-  order_item: laptop_item
-  user: regular
-  share: 3
-
-laptop_admin_split:
-  order_item: laptop_item
-  user: admin
-  share: 1
