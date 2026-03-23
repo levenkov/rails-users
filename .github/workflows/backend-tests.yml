@@ -33,8 +33,8 @@ jobs:
 
       - name: Build base images
         run: |
-          docker build -t puhatak:latest --target app .
-          docker build -t puhatak-builder:latest --target builder .
+          docker build -t pm:latest --target app .
+          docker build -t pm-builder:latest --target builder .
 
       - name: Build and start test services
         run: docker compose -f test/docker/docker-compose.test.yml up -d
@@ -42,7 +42,7 @@ jobs:
       - name: Wait for services to be ready
         run: |
           echo "Waiting for PostgreSQL..."
-          until docker compose -f test/docker/docker-compose.test.yml exec -T db pg_isready -U puhatak; do
+          until docker compose -f test/docker/docker-compose.test.yml exec -T db pg_isready -U pm; do
             echo "PostgreSQL is unavailable - sleeping"
             sleep 1
           done

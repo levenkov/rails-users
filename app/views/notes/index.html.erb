@@ -1,0 +1,8 @@
+<%= content_for :head do %>
+  <%= webpack_javascript_tag "notes" %>
+<% end %>
+
+<div class="max-w-6xl mx-auto px-4 py-6">
+  <%= render "shared/navigation" %>
+  <div id="notes-react-root"></div>
+</div>

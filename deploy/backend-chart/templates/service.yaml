@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "puhatak-backend.fullname" . }}
+  name: {{ include "pm-backend.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}
-    helm.sh/chart: {{ include "puhatak-backend.chart" . }}
+    app.kubernetes.io/name: {{ include "pm-backend.name" . }}
+    helm.sh/chart: {{ include "pm-backend.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
@@ -15,5 +15,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}
+    app.kubernetes.io/name: {{ include "pm-backend.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

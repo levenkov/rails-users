@@ -1,0 +1,39 @@
+<div class="max-w-2xl mx-auto px-4 py-6">
+  <%= render "shared/navigation" %>
+
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-semibold text-gray-800">Tags</h2>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+    <%= form_with model: NoteTag.new, url: note_tags_path, class: "flex items-center gap-2 mb-6" do |f| %>
+      <%= f.text_field :name, placeholder: "New tag name...",
+          class: "flex-grow text-sm border border-gray-200 rounded-md px-3 py-2 focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400" %>
+      <%= f.submit "Add", class: "px-4 py-2 text-sm font-medium text-white bg-yellow-500 rounded-lg hover:bg-yellow-600 cursor-pointer" %>
+    <% end %>
+
+    <% if @tags.empty? %>
+      <p class="text-sm text-gray-500 text-center py-4">No tags yet.</p>
+    <% else %>
+      <div class="space-y-2">
+        <% @tags.each do |tag| %>
+          <div class="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 group">
+            <span class="inline-flex items-center px-2.5 py-0.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full">
+              <%= tag.name %>
+            </span>
+            <span class="flex items-center gap-3">
+              <span class="text-xs text-gray-400"><%= tag.notes.count %> note<%= tag.notes.count == 1 ? "" : "s" %></span>
+              <%= link_to note_tag_path(tag),
+                  data: { turbo_method: :delete, turbo_confirm: "Delete tag '#{tag.name}'?" },
+                  class: "hidden group-hover:inline text-gray-300 hover:text-red-400 text-sm" do %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              <% end %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

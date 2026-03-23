@@ -1,2 +1,3 @@
 web: env RUBY_DEBUG_OPEN=true bin/rails server -b $BINDING -p $PORT
 js: yarn build --watch
+hmr: npx webpack serve --config webpack.dev.config.js

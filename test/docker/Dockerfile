@@ -1,10 +1,10 @@
-FROM puhatak-builder:latest AS gem_installer
+FROM pm-builder:latest AS gem_installer
 
 RUN bundle config unset without && bundle install --no-cache && \
     bundle clean --force && \
     rm -rf /usr/local/bundle/cache /usr/local/lib/ruby/gems/3.4.0/cache
 
-FROM puhatak:latest
+FROM pm:latest
 
 COPY --from=gem_installer /usr/local/bundle /usr/local/bundle
 

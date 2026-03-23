@@ -1,11 +1,11 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ include "puhatak-backend.fullname" . }}
+  name: {{ include "pm-backend.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}
-    helm.sh/chart: {{ include "puhatak-backend.chart" . }}
+    app.kubernetes.io/name: {{ include "pm-backend.name" . }}
+    helm.sh/chart: {{ include "pm-backend.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     {{- if .Values.gateway.external }}
@@ -17,7 +17,7 @@ spec:
     - name: {{ .Values.gateway.external.gatewayName }}
       namespace: {{ .Values.gateway.external.gatewayNamespace }}
     {{- else }}
-    - name: {{ include "puhatak-backend.fullname" . }}-gateway
+    - name: {{ include "pm-backend.fullname" . }}-gateway
       namespace: {{ .Release.Namespace }}
     {{- end }}
   {{- if .Values.gateway.host }}
@@ -30,5 +30,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: {{ include "puhatak-backend.fullname" . }}
+        - name: {{ include "pm-backend.fullname" . }}
           port: 3000

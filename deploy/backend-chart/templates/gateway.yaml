@@ -2,11 +2,11 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: {{ include "puhatak-backend.fullname" . }}-gateway
+  name: {{ include "pm-backend.fullname" . }}-gateway
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}
-    helm.sh/chart: {{ include "puhatak-backend.chart" . }}
+    app.kubernetes.io/name: {{ include "pm-backend.name" . }}
+    helm.sh/chart: {{ include "pm-backend.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:

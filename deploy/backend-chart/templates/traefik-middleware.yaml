@@ -2,11 +2,11 @@
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: {{ include "puhatak-backend.fullname" . }}-minio-stripprefix
+  name: {{ include "pm-backend.fullname" . }}-minio-stripprefix
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}
-    helm.sh/chart: {{ include "puhatak-backend.chart" . }}
+    app.kubernetes.io/name: {{ include "pm-backend.name" . }}
+    helm.sh/chart: {{ include "pm-backend.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
@@ -17,11 +17,11 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: {{ include "puhatak-backend.fullname" . }}-limit-body-size
+  name: {{ include "pm-backend.fullname" . }}-limit-body-size
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}
-    helm.sh/chart: {{ include "puhatak-backend.chart" . }}
+    app.kubernetes.io/name: {{ include "pm-backend.name" . }}
+    helm.sh/chart: {{ include "pm-backend.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:

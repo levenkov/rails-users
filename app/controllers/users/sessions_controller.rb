@@ -66,6 +66,7 @@ class Users::SessionsController < Devise::SessionsController
     end
 
     set_flash_message!(:notice, :signed_in)
+    resource.remember_me = resource_params[:remember_me]
     sign_in(resource_name, resource)
     yield resource if block_given?
 
@@ -79,7 +80,7 @@ class Users::SessionsController < Devise::SessionsController
   end
 
   def sign_in_params
-    params.require(:user).permit(:email, :password)
+    params.require(:user).permit(:email, :password, :remember_me)
   rescue ActionController::ParameterMissing
     {}
   end

@@ -4,9 +4,9 @@ services:
     image: postgres:15-alpine
     restart: always
     environment:
-      POSTGRES_USER: puhatak
+      POSTGRES_USER: pm
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: puhatak_test
+      POSTGRES_DB: pm_test
     ports:
       - "5432:5432"
   redis:
@@ -23,5 +23,5 @@ services:
       - redis
     environment:
       RAILS_ENV: test
-      DATABASE_URL: postgresql://puhatak:password@db:5432/puhatak_test
+      DATABASE_URL: postgresql://pm:password@db:5432/pm_test
       REDIS_URL: redis://redis:6379/1

@@ -43,7 +43,12 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :notes do
+    resources :note_points, only: [:create, :update, :destroy]
+  end
+  resources :note_tags, only: [:index, :create, :destroy]
+
   get 'up' => 'rails/health#show', as: :rails_health_check
 
-  root 'home#show'
+  root 'notes#index'
 end

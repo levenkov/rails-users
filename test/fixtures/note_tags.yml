@@ -1,0 +1,11 @@
+admin_tag_work:
+  user: admin
+  name: work
+
+admin_tag_personal:
+  user: admin
+  name: personal
+
+regular_tag:
+  user: regular
+  name: todo

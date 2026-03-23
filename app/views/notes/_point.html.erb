@@ -1,0 +1,38 @@
+<div class="group" style="margin-left: <%= depth * 24 %>px;">
+  <div class="flex items-center gap-2 py-1">
+    <%= form_with model: [point.note, point], class: "flex items-center gap-2 flex-grow" do |f| %>
+      <%= f.check_box :checked,
+          onchange: "this.form.requestSubmit()",
+          class: "h-4 w-4 rounded border-gray-300 text-yellow-500 focus:ring-yellow-400" %>
+      <%= f.text_field :text,
+          value: point.text,
+          class: "flex-grow text-sm border-0 px-1 py-0.5 #{point.checked? ? 'line-through text-gray-400' : 'text-gray-700'} focus:ring-0 bg-transparent" %>
+      <%= f.hidden_field :position, value: point.position %>
+      <noscript><%= f.submit "Save", class: "text-xs text-gray-400" %></noscript>
+    <% end %>
+
+    <div class="hidden group-hover:flex items-center gap-1">
+      <%= link_to note_note_point_path(point.note, point),
+          data: { turbo_method: :delete, turbo_confirm: "Remove this checkpoint?" },
+          class: "text-gray-300 hover:text-red-400" do %>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Add sub-checkpoint form (shown on hover) %>
+  <div class="hidden group-hover:block ml-6 mb-1">
+    <%= form_with model: [point.note, NotePoint.new], class: "flex items-center gap-1" do |f| %>
+      <%= f.hidden_field :parent_id, value: point.id %>
+      <%= f.text_field :text, placeholder: "Add sub-item...",
+          class: "flex-grow text-xs border border-gray-100 rounded px-2 py-1 focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400" %>
+      <%= f.submit "+", class: "px-2 py-1 text-xs text-gray-400 hover:text-gray-600 cursor-pointer" %>
+    <% end %>
+  </div>
+</div>
+
+<% point.children.each do |child| %>
+  <%= render partial: "notes/point", object: child, as: :point, locals: { depth: depth + 1 } %>
+<% end %>

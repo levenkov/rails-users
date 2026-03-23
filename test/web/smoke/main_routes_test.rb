@@ -21,7 +21,13 @@ class MainRoutesSmokeTest < ActionDispatch::IntegrationTest
 
   # Index page
 
-  test 'index page accessible' do
+  test 'index page redirects to login when not authenticated' do
+    get root_path
+    assert_response :redirect
+  end
+
+  test 'index page accessible when authenticated' do
+    sign_in @regular_user
     get root_path
     assert_html_success
   end

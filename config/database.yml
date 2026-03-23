@@ -4,21 +4,43 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 development:
-  <<: *default
-  database: puhatak_dev
-  username: puhatak
-  password: password
-  host: localhost
+  primary:
+    <<: *default
+    database: pm_dev
+    username: pm
+    password: password
+    host: localhost
+  queue:
+    <<: *default
+    database: pm_dev_queue
+    username: pm
+    password: password
+    host: localhost
+    migrations_paths: db/queue_migrate
 
 test:
-  <<: *default
-  database: puhatak_test
-  username: puhatak
-  password: password
-  host: localhost
+  primary:
+    <<: *default
+    database: pm_test
+    username: pm
+    password: password
+    host: localhost
+  queue:
+    <<: *default
+    database: pm_test_queue
+    username: pm
+    password: password
+    host: localhost
+    migrations_paths: db/queue_migrate
 
 production:
-  <<: *default
-  database: puhatak_production
-  username: puhatak
-  password: <%= ENV["NALKA_DATABASE_PASSWORD"] %>
+  primary:
+    <<: *default
+    database: pm_production
+    username: pm
+    password: <%= ENV["NALKA_DATABASE_PASSWORD"] %>
+  queue:
+    <<: *default
+    database: pm_production_queue
+    username: pm
+    password: <%= ENV["NALKA_DATABASE_PASSWORD"] %>

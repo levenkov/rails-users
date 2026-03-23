@@ -1,0 +1,23 @@
+admin_note_one:
+  user: admin
+  title: First Admin Note
+  body: Body of the first note
+  order: 1000
+
+admin_note_two:
+  user: admin
+  title: Second Admin Note
+  body: Body of the second note
+  order: 2000
+
+admin_note_three:
+  user: admin
+  title: Third Admin Note
+  body: Body of the third note
+  order: 3000
+
+regular_note:
+  user: regular
+  title: Regular User Note
+  body: Body of regular user note
+  order: 1000

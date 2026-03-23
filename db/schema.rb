@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_01_000003) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_01_000004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,48 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_01_000003) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "note_points", force: :cascade do |t|
+    t.bigint "note_id", null: false
+    t.bigint "parent_id"
+    t.string "text", null: false
+    t.boolean "checked", default: false, null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["note_id"], name: "index_note_points_on_note_id"
+    t.index ["parent_id"], name: "index_note_points_on_parent_id"
+  end
+
+  create_table "note_taggings", force: :cascade do |t|
+    t.bigint "note_id", null: false
+    t.bigint "note_tag_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["note_id", "note_tag_id"], name: "index_note_taggings_on_note_id_and_note_tag_id", unique: true
+    t.index ["note_id"], name: "index_note_taggings_on_note_id"
+    t.index ["note_tag_id"], name: "index_note_taggings_on_note_tag_id"
+  end
+
+  create_table "note_tags", force: :cascade do |t|
+    t.string "name", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "name"], name: "index_note_tags_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_note_tags_on_user_id"
+  end
+
+  create_table "notes", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "title"
+    t.text "body"
+    t.integer "order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "order"], name: "index_notes_on_user_id_and_order"
+    t.index ["user_id"], name: "index_notes_on_user_id"
   end
 
   create_table "user_oauths", force: :cascade do |t|
@@ -72,5 +114,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_01_000003) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "note_points", "note_points", column: "parent_id"
+  add_foreign_key "note_points", "notes"
+  add_foreign_key "note_taggings", "note_tags"
+  add_foreign_key "note_taggings", "notes"
+  add_foreign_key "note_tags", "users"
+  add_foreign_key "notes", "users"
   add_foreign_key "user_oauths", "users"
 end

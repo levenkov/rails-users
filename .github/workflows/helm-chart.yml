@@ -61,4 +61,4 @@ jobs:
 
       - name: Push Helm chart to GHCR
         run: |
-          helm push puhatak-backend-${{ steps.gitver.outputs.chart_version }}.tgz oci://ghcr.io/${{ github.repository }}/charts
+          helm push pm-backend-${{ steps.gitver.outputs.chart_version }}.tgz oci://ghcr.io/${{ github.repository }}/charts

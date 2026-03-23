@@ -83,4 +83,6 @@ Rails.application.configure do
   config.debug_exception_response_format = :api
 
   config.hosts << "dev0-regulus.noo.bar"
+  config.hosts << /\A(\d+\.){3}\d+\z/  # allow access by IP
+  config.assume_ssl = ENV.fetch('ASSUME_SSL', 'true') == 'true'
 end

@@ -4,8 +4,8 @@ To remove all installed Kubernetes components:
 
 ```bash
 # Remove application
-helm uninstall puhatak -n puhatak
-kubectl delete namespace puhatak
+helm uninstall pm -n pm
+kubectl delete namespace pm
 
 # Remove Traefik
 helm uninstall traefik -n traefik

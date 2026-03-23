@@ -1,0 +1,18 @@
+point_one:
+  note: admin_note_one
+  text: First point
+  checked: false
+  position: 0
+
+point_two:
+  note: admin_note_one
+  text: Second point
+  checked: true
+  position: 1
+
+child_point:
+  note: admin_note_one
+  parent: point_one
+  text: Child of first point
+  checked: false
+  position: 0

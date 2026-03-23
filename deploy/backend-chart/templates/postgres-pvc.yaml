@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "puhatak-backend.fullname" . }}-postgres-data
+  name: {{ include "pm-backend.fullname" . }}-postgres-data
   labels:
-    app.kubernetes.io/name: {{ include "puhatak-backend.name" . }}-postgres
-    helm.sh/chart: {{ include "puhatak-backend.chart" . }}
+    app.kubernetes.io/name: {{ include "pm-backend.name" . }}-postgres
+    helm.sh/chart: {{ include "pm-backend.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:

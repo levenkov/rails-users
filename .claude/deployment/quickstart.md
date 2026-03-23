@@ -6,18 +6,18 @@ The Helm chart includes everything needed: PostgreSQL, Redis, MinIO. Everything 
 cd deploy
 
 # Install/upgrade release
-helm upgrade --install puhatak ./backend-chart \
-  --namespace puhatak \
+helm upgrade --install pm ./backend-chart \
+  --namespace pm \
   --create-namespace
 
 # Check pod status
-kubectl get pods -n puhatak
+kubectl get pods -n pm
 ```
 
 After startup, you'll need to manually run migrations:
 
 ```bash
-kubectl exec -n puhatak deployment/puhatak-puhatak-backend -- bin/rails db:migrate # or db:migrate:reset for the first time
+kubectl exec -n pm deployment/pm-pm-backend -- bin/rails db:migrate # or db:migrate:reset for the first time
 ```
 
 ## Components
@@ -49,7 +49,7 @@ kubectl get svc traefik -n traefik
 ## Checking Logs
 
 ```bash
-kubectl logs -n puhatak deployment/puhatak-puhatak-backend
+kubectl logs -n pm deployment/pm-pm-backend
 ```
 
 ## Scaling
@@ -57,7 +57,7 @@ kubectl logs -n puhatak deployment/puhatak-puhatak-backend
 To run multiple application instances:
 
 ```bash
-helm upgrade puhatak ./backend-chart --set replicaCount=3
+helm upgrade pm ./backend-chart --set replicaCount=3
 ```
 
 MinIO ensures correct Active Storage operation with multiple pods.

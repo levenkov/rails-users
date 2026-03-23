@@ -18,7 +18,7 @@ require 'rails/test_unit/railtie'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module Puhatak
+module Pm
   class Application < Rails::Application
     config.app_host = ENV.fetch('APP_HOST', 'localhost')
 
@@ -31,5 +31,8 @@ module Puhatak
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
+
+    config.active_job.queue_adapter = :solid_queue
+    config.solid_queue.connects_to = { database: { writing: :queue } }
   end
 end

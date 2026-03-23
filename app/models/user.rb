@@ -14,6 +14,8 @@ class User < ApplicationRecord
   simple_enum :role, :admin, default: :regular
 
   has_many :user_oauths, dependent: :destroy
+  has_many :notes, dependent: :destroy
+  has_many :note_tags, dependent: :destroy
   has_one_attached :avatar
 
   validates :name, presence: true
