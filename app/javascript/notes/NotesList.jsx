@@ -15,13 +15,16 @@ const getColumnCount = (width) => {
 const NotesList = ({onSelectNote, onNewNote}) => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [layout, setLayout] = useState(null);
   const [draggingNoteId, setDraggingNoteId] = useState(null);
   const [dragPos, setDragPos] = useState(null);
-  const [homunculusOrder, setHomunculusOrder] = useState(null);
+  const [homunculusIndex, setHomunculusIndex] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
+  const [closestNoteId, setClosestNoteId] = useState(null);
+  const [heightsReady, setHeightsReady] = useState(false);
+
   const containerRef = useRef(null);
-  const measuringRef = useRef(null);
   const masonryRef = useRef(null);
+  const heightsMap = useRef({});
   const dragOffsetRef = useRef({x: 0, y: 0});
   const dragThrottleRef = useRef(null);
   const draggingHeightRef = useRef(0);
@@ -30,6 +33,7 @@ const NotesList = ({onSelectNote, onNewNote}) => {
     setLoading(true);
     const data = await api.get('/notes.json');
     setNotes(data);
+    setHeightsReady(false);
     setLoading(false);
   };
 
@@ -37,12 +41,26 @@ const NotesList = ({onSelectNote, onNewNote}) => {
     fetchNotes();
   }, []);
 
-  // Index where homunculus should appear (starts at dragged note's index)
-  const [homunculusIndex, setHomunculusIndex] = useState(null);
-  const [debugInfo, setDebugInfo] = useState(null);
-  const [closestNoteId, setClosestNoteId] = useState(null);
+  // Measure all cards once after they render
+  useEffect(() => {
+    if (heightsReady || notes.length === 0 || !masonryRef.current) return;
 
-  // Build the ordered list with homunculus replacing the dragged note
+    requestAnimationFrame(() => {
+      const cards = masonryRef.current?.children;
+      if (!cards) return;
+
+      for (let i = 0; i < cards.length; i++) {
+        const noteId = notes[i]?.id;
+        if (noteId && !heightsMap.current[noteId]) {
+          heightsMap.current[noteId] = cards[i].offsetHeight;
+        }
+      }
+
+      setHeightsReady(true);
+    });
+  }, [notes, heightsReady]);
+
+  // Build layoutNotes with homunculus
   const layoutNotes = useMemo(() => {
     if (!draggingNoteId || homunculusIndex === null) return notes;
 
@@ -62,29 +80,26 @@ const NotesList = ({onSelectNote, onNewNote}) => {
     return result;
   }, [notes, draggingNoteId, homunculusIndex]);
 
-  const computeLayout = useCallback(() => {
-    if (!measuringRef.current || !containerRef.current || layoutNotes.length === 0) return;
+  // Compute layout synchronously from cached heights
+  const layout = useMemo(() => {
+    if (!containerRef.current || layoutNotes.length === 0 || !heightsReady) return null;
+
+    console.log('layout useMemo recalc, homunculusIndex:', homunculusIndex, 'draggingNoteId:', draggingNoteId);
 
     const containerWidth = containerRef.current.offsetWidth;
     const colCount = getColumnCount(containerWidth);
     const colWidth = (containerWidth - GAP * (colCount - 1)) / colCount;
 
-    // Set measuring container width imperatively before reading heights
-    measuringRef.current.style.width = colWidth + 'px';
-
-    // Force reflow
-    void measuringRef.current.offsetHeight;
-
-    const cards = measuringRef.current.children;
-    const heights = [];
-    for (let i = 0; i < cards.length; i++) {
-      heights.push(cards[i].offsetHeight);
-    }
-
     const colHeights = new Array(colCount).fill(0);
-    const positions = [];
+    const posMap = {};
 
-    for (let i = 0; i < heights.length; i++) {
+    for (let i = 0; i < layoutNotes.length; i++) {
+      const note = layoutNotes[i];
+      const noteKey = note.id || '__homunculus__';
+      const height = note._isHomunculus
+        ? draggingHeightRef.current
+        : (heightsMap.current[noteKey] || 0);
+
       let minCol = 0;
       for (let c = 1; c < colCount; c++) {
         if (colHeights[c] < colHeights[minCol]) {
@@ -92,47 +107,45 @@ const NotesList = ({onSelectNote, onNewNote}) => {
         }
       }
 
-      positions.push({
+      posMap[noteKey] = {
         left: minCol * (colWidth + GAP),
         top: colHeights[minCol],
-        width: colWidth,
-      });
+      };
 
-      colHeights[minCol] += heights[i] + GAP;
+      colHeights[minCol] += height + GAP;
     }
 
     const totalHeight = Math.max(...colHeights, 0);
-    setLayout({positions, totalHeight, colWidth});
-  }, [layoutNotes]);
+    return {posMap, totalHeight, colWidth};
+  }, [layoutNotes, heightsReady]);
 
+  // Re-measure on resize
   useEffect(() => {
-    if (layoutNotes.length === 0) return;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => computeLayout());
-    });
-  }, [layoutNotes, computeLayout]);
-
-  useEffect(() => {
-    const handleResize = () => computeLayout();
+    const handleResize = () => {
+      heightsMap.current = {};
+      setHeightsReady(false);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [computeLayout]);
+  }, []);
 
   // Determine target index from floating card's left-top position
   const computeIndexFromPosition = useCallback((floatLeft, floatTop) => {
     if (!layout || !layoutNotes.length) return 0;
 
-    // Collect non-homunculus, non-dragging items with their positions and original index
     const items = [];
     let indexInOthers = 0;
-    layoutNotes.forEach((n, i) => {
+    layoutNotes.forEach((n) => {
       if (n._isHomunculus) return;
       if (n.id === draggingNoteId) return;
-      if (layout.positions[i]) {
+      const itemPos = layout.posMap[n.id];
+      if (itemPos) {
         items.push({
           index: indexInOthers,
-          left: layout.positions[i].left,
-          top: layout.positions[i].top,
+          left: itemPos.left,
+          top: itemPos.top,
+          id: n.id,
+          title: n.title,
         });
       }
       indexInOthers++;
@@ -140,37 +153,33 @@ const NotesList = ({onSelectNote, onNewNote}) => {
 
     if (items.length === 0) return 0;
 
-    // Compute distances to all items
-    const dists = items.map((item, i) => {
+    const dists = items.map((item) => {
       const dx = floatLeft - item.left;
       const dy = floatTop - item.top;
-      return {i, index: item.index, dist: Math.sqrt(dx * dx + dy * dy), item};
+      return {index: item.index, dist: Math.sqrt(dx * dx + dy * dy), item};
     });
     dists.sort((a, b) => a.dist - b.dist);
 
     const closest = dists[0];
     const secondClosest = dists.length > 1 ? dists[1] : null;
 
-    // Find the note title for debug
-    const others = layoutNotes.filter(n => !n._isHomunculus && n.id !== draggingNoteId);
-    const closestNote = others[closest.index];
-
     setDebugInfo({
       floatLeft: Math.round(floatLeft),
       floatTop: Math.round(floatTop),
       closestLeft: Math.round(closest.item.left),
       closestTop: Math.round(closest.item.top),
-      closestTitle: closestNote?.title || '(untitled)',
+      closestTitle: closest.item.title || '(untitled)',
       closestIdx: closest.index,
     });
-    setClosestNoteId({id: closestNote?.id || null, dist: closest.dist});
+    setClosestNoteId({id: closest.item.id, dist: closest.dist});
 
-    // Only switch homunculus if closest is 5x closer than second closest
-    if (!secondClosest || closest.dist * 5 < secondClosest.dist) {
+    const passes5x = !secondClosest || closest.dist * 5 < secondClosest.dist;
+    console.log('5x check:', 'closest dist:', Math.round(closest.dist), 'second dist:', secondClosest ? Math.round(secondClosest.dist) : 'none', 'passes:', passes5x, 'returning:', passes5x ? closest.index : homunculusIndex);
+
+    if (passes5x) {
       return closest.index;
     }
 
-    // Otherwise keep current position
     return homunculusIndex !== null ? homunculusIndex : closest.index;
   }, [layout, layoutNotes, draggingNoteId, homunculusIndex]);
 
@@ -185,12 +194,16 @@ const NotesList = ({onSelectNote, onNewNote}) => {
       const newTop = e.clientY - masonryRect.top - dragOffsetRef.current.y;
       setDragPos({left: newLeft, top: newTop});
 
-      // Throttled index recalculation
       if (!dragThrottleRef.current) {
         dragThrottleRef.current = setTimeout(() => {
           dragThrottleRef.current = null;
           const newIndex = computeIndexFromPosition(newLeft, newTop);
-          setHomunculusIndex(prev => prev === newIndex ? prev : newIndex);
+          console.log('throttle: newIndex', newIndex, 'current homunculusIndex', homunculusIndex);
+          setHomunculusIndex(prev => {
+            if (prev === newIndex) return prev;
+            console.log('setHomunculusIndex:', prev, '→', newIndex);
+            return newIndex;
+          });
         }, DRAG_THROTTLE_MS);
       }
     };
@@ -206,14 +219,14 @@ const NotesList = ({onSelectNote, onNewNote}) => {
   }, [draggingNoteId, computeIndexFromPosition]);
 
   // Start drag
-  const startDrag = (note, i, e) => {
+  const startDrag = (note, e) => {
     const masonryRect = masonryRef.current.getBoundingClientRect();
-    const cardPos = layout.positions[i];
+    const cardPos = layout.posMap[note.id];
     dragOffsetRef.current = {
       x: e.clientX - masonryRect.left - cardPos.left,
       y: e.clientY - masonryRect.top - cardPos.top,
     };
-    draggingHeightRef.current = measuringRef.current?.children[i]?.offsetHeight || 50;
+    draggingHeightRef.current = heightsMap.current[note.id] || 50;
     const noteIndex = notes.findIndex(n => n.id === note.id);
     setHomunculusIndex(noteIndex);
     setDraggingNoteId(note.id);
@@ -224,7 +237,6 @@ const NotesList = ({onSelectNote, onNewNote}) => {
   const drop = async () => {
     if (!draggingNoteId || homunculusIndex === null) return;
 
-    // Compute new order based on neighbors at homunculus position
     const others = notes.filter(n => n.id !== draggingNoteId);
     const prevNote = homunculusIndex > 0 ? others[homunculusIndex - 1] : null;
     const nextNote = homunculusIndex < others.length ? others[homunculusIndex] : null;
@@ -257,6 +269,8 @@ const NotesList = ({onSelectNote, onNewNote}) => {
     return <div style={styles.loading}>Loading notes...</div>;
   }
 
+  const colWidth = layout ? layout.colWidth : 200;
+
   return (
     <div ref={containerRef}>
       <div style={styles.header}>
@@ -272,113 +286,88 @@ const NotesList = ({onSelectNote, onNewNote}) => {
       {notes.length === 0 ? (
         <div style={styles.empty}>No notes yet. Create your first note!</div>
       ) : (
-        <>
-          {/* Hidden measuring layer */}
-          <div
-            ref={measuringRef}
-            style={{
-              position: 'absolute',
-              visibility: 'hidden',
-              width: (() => {
-                if (layout) return layout.colWidth;
-                if (!containerRef.current) return '50%';
-                const w = containerRef.current.offsetWidth;
-                const cols = getColumnCount(w);
-                return (w - GAP * (cols - 1)) / cols;
-              })(),
-              left: -9999,
-            }}
-          >
-            {layoutNotes.map(note => (
-              note._isHomunculus
-                ? <div key="__homunculus__" style={{height: draggingHeightRef.current, marginBottom: 8}} />
-                : <NoteCard key={note.id} note={note} onClick={() => {}} />
-            ))}
-          </div>
+        <div ref={masonryRef} style={{position: 'relative', height: layout ? layout.totalHeight : 'auto', overflow: 'hidden'}}>
+          {layoutNotes.map((note) => {
+            const noteKey = note.id || '__homunculus__';
+            const pos = layout ? layout.posMap[noteKey] : null;
+            const left = pos ? pos.left : -9999;
+            const top = pos ? pos.top : 0;
 
-          {/* Positioned layout */}
-          {layout && (
-            <div ref={masonryRef} style={{position: 'relative', height: layout.totalHeight}}>
-              {layoutNotes.map((note, i) => {
-                const pos = layout.positions[i];
-                if (!pos) return null;
+            if (note._isHomunculus) {
+              return (
+                <div
+                  key="__homunculus__"
+                  style={{
+                    position: 'absolute',
+                    left,
+                    top,
+                    width: colWidth,
+                    height: draggingHeightRef.current,
+                    borderRadius: 8,
+                    border: '2px dashed #d1d5db',
+                    background: '#f9fafb',
+                    transition: 'all 1s',
+                  }}
+                />
+              );
+            }
 
-                if (note._isHomunculus) {
-                  return (
-                    <div
-                      key="__homunculus__"
-                      style={{
-                        position: 'absolute',
-                        left: pos.left,
-                        top: pos.top,
-                        width: pos.width,
-                        height: draggingHeightRef.current,
-                        borderRadius: 8,
-                        border: '2px dashed #d1d5db',
-                        background: '#f9fafb',
-                        transition: 'left 1s, top 1s',
-                      }}
-                    />
-                  );
-                }
+            const isClosest = closestNoteId && closestNoteId.id === note.id && draggingNoteId !== null;
+            const closestOpacity = isClosest
+              ? Math.max(0.3, Math.min(1, closestNoteId.dist / 200))
+              : 1;
 
-                const isClosest = closestNoteId && closestNoteId.id === note.id && draggingNoteId !== null;
-                const closestOpacity = isClosest
-                  ? Math.max(0.3, Math.min(1, closestNoteId.dist / 200))
-                  : 1;
-                return (
-                  <div
-                    key={note.id}
-                    style={{
-                      position: 'absolute',
-                      left: pos.left,
-                      top: pos.top,
-                      width: pos.width,
-                      transition: 'left 0.2s, top 0.2s, opacity 0.15s',
-                      opacity: closestOpacity,
-                    }}
-                  >
-                    <NoteCard
-                      note={note}
-                      onClick={() => onSelectNote(note.id)}
-                      highlighted={isClosest}
-                      onCtrlClick={(e) => {
-                        if (draggingNoteId === note.id) {
-                          drop();
-                        } else {
-                          startDrag(note, i, e);
-                        }
-                      }}
-                      dragging={false}
-                    />
-                  </div>
-                );
-              })}
+            return (
+              <div
+                key={note.id}
+                style={{
+                  position: 'absolute',
+                  left,
+                  top,
+                  width: colWidth,
+                  transition: 'all 1s',
+                  opacity: closestOpacity,
+                }}
+              >
+                <NoteCard
+                  note={note}
+                  onClick={() => onSelectNote(note.id)}
+                  highlighted={isClosest}
+                  onCtrlClick={(e) => {
+                    if (draggingNoteId === note.id) {
+                      drop();
+                    } else {
+                      startDrag(note, e);
+                    }
+                  }}
+                  dragging={false}
+                />
+              </div>
+            );
+          })}
 
-              {/* Floating card — inside masonryRef so same coordinate system */}
-              {draggingNoteId && dragPos && (() => {
-                const dragNote = notes.find(n => n.id === draggingNoteId);
-                if (!dragNote) return null;
-                return (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: dragPos.left,
-                      top: dragPos.top,
-                      width: layout.colWidth,
-                      zIndex: 100,
-                      opacity: 0.85,
-                      cursor: 'grabbing',
-                      pointerEvents: 'none',
-                    }}
-                  >
-                    <NoteCard note={dragNote} onClick={() => {}} dragging={true} />
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-        </>
+          {/* Floating card */}
+          {draggingNoteId && dragPos && (() => {
+            const dragNote = notes.find(n => n.id === draggingNoteId);
+            if (!dragNote) return null;
+            return (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: dragPos.left,
+                  top: dragPos.top,
+                  width: colWidth,
+                  zIndex: 100,
+                  opacity: 0.85,
+                  cursor: 'grabbing',
+                  pointerEvents: 'none',
+                }}
+              >
+                <NoteCard note={dragNote} onClick={() => {}} dragging={true} />
+              </div>
+            );
+          })()}
+        </div>
       )}
     </div>
   );
@@ -403,7 +392,7 @@ const styles = {
     borderRadius: 24,
     cursor: 'pointer',
     boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)',
-    transition: 'box-shadow 0.15s',
+    transition: 'all 1s',
   },
   empty: {
     textAlign: 'center',

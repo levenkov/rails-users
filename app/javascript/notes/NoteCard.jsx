@@ -7,7 +7,7 @@ const styles = {
     borderRadius: 8,
     padding: '12px 16px',
     cursor: 'pointer',
-    transition: 'box-shadow 0.15s',
+    transition: 'all 1s',
     display: 'flex',
     flexDirection: 'column',
     gap: 4,
