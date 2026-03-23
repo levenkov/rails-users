@@ -81,4 +81,6 @@ Rails.application.configure do
   config.active_storage.service = :local
 
   config.debug_exception_response_format = :api
+
+  config.hosts << "dev0-regulus.noo.bar"
 end
